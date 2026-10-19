@@ -2,7 +2,7 @@
 
 Verificação executada em 19/10/2026, em ambiente local Linux, Python 3.12.14 e Chromium. Contas e registros de teste são fictícios.
 
-## API e banco — 10 testes aprovados
+## API, banco e hospedagem — 11 testes aprovados
 
 `python -m unittest discover -s tests -p 'test_*.py' -v`
 
@@ -17,7 +17,9 @@ Verificação executada em 19/10/2026, em ambiente local Linux, Python 3.12.14 e
 9. API protegida rejeita requisição sem autenticação.
 10. Integridade do SQLite e chaves estrangeiras sem violações.
 
-Resultado final: **10/10 aprovados**, em banco temporário isolado. `node --check app/static/app.js` e compilação Python também passaram.
+11. Comando real de hospedagem testado em subprocesso: lê a porta `PORT`, cria o banco em diretório persistente configurável, responde ao health check sem expor dados, preserva alterações em duas reinicializações sem duplicar o seed e emite cookie com Secure, HttpOnly e SameSite=Strict no modo HTTPS.
+
+Resultado final após preparar a publicação: **11/11 aprovados**, em bancos temporários isolados. `node --check app/static/app.js` e compilação Python também passaram.
 
 ## Navegador — fluxos reais aprovados
 
@@ -40,3 +42,7 @@ Os roteiros estão em `tests/browser_qa.py` e `tests/browser_flows.py`. São ver
 Não houve publicação nem validação em infraestrutura pública. E-mail/recuperação de senha, IA, gateway, QR Code, uploads e cobrança recorrente automática não foram implementados ou simulados. O aplicativo informa indisponibilidade dos serviços. A persistência validada é SQLite no disco local, não Supabase ou banco hospedado.
 
 As capturas mostram dados fictícios. A autorização de avaliações é um registro administrativo manual; não equivale, por si só, a um processo jurídico completo de consentimento. Consulte o README antes de utilizar dados reais.
+
+## Publicação pelo navegador
+
+Adicionados `render.yaml`, `.python-version`, botão de publicação no README e guia `docs/PUBLICAR.md`. O YAML foi lido e conferido localmente, com campos e seleção de branch consultados na documentação oficial do Render. A conta Render e o provisionamento do serviço não foram acessados; não foi executada validação autenticada do Blueprint no Render nem verificada uma URL hospedada. O plano pago e o disco são revisados e aprovados pelo usuário na hospedagem. O código inclui um workflow para executar a suíte no GitHub; a execução remota desse workflow depende do GitHub Actions e não foi verificada nesta entrega.
