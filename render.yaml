@@ -1,24 +1,31 @@
-# Deploy pelo navegador. O banco fica em disco persistente (plano pago).
+# Node.js + React/TypeScript + PostgreSQL gerenciado. Sem runtime Python.
 services:
   - type: web
-    name: gymflow-demo
-    runtime: python
+    name: gymflow-node
+    runtime: node
     branch: work
     plan: 0.5c-512mb
-    autoDeployTrigger: 'off'
-    buildCommand: python -m compileall -q app
-    startCommand: python app/server.py --host 0.0.0.0 --seed-demo
+    region: oregon
+    autoDeployTrigger: "off"
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
     healthCheckPath: /api/health
-    disk:
-      name: gymflow-data
-      mountPath: /var/data
-      sizeGB: 1
     envVars:
-      - key: GYMFLOW_DB
-        value: /var/data/gymflow.sqlite3
+      - key: NODE_ENV
+        value: production
       - key: GYMFLOW_DEMO
-        value: '1'
-      - key: GYMFLOW_SECURE_COOKIE
-        value: '1'
-      - key: PYTHONUNBUFFERED
-        value: '1'
+        value: "1"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: gymflow-postgres
+          property: connectionString
+
+databases:
+  - name: gymflow-postgres
+    databaseName: gymflow
+    user: gymflow
+    postgresMajorVersion: "18"
+    plan: 0.1c-256mb
+    diskSizeGB: 1
+    region: oregon
+    ipAllowList: []

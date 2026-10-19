@@ -1,38 +1,22 @@
-# GymFlow — Gestão em movimento
+# GymFlow — React, Node.js e PostgreSQL
 
-Aplicação web funcional para demonstração e avaliação de um sistema de academia. Identidade Athletic Tech Premium em preto, grafite e violeta; tipografia Inter e Space Grotesk hospedada junto do app. Sem verde.
+Sistema web de gestão de academia, refeito em **React + TypeScript**, **Node.js + Express** e **PostgreSQL**. O projeto não usa runtime, scripts ou testes em Python. A identidade Athletic Tech Premium em preto, grafite e violeta foi mantida.
 
-O repositório recebido tinha somente um README. A aplicação foi construída do zero a partir dos dois textos; a identidade violeta do segundo texto prevalece. Não havia integrações ou dados anteriores para migrar.
-
-## Usar pelo navegador — sem instalar Python
-
-**Você não precisa instalar Python, Git, Node ou outro programa no computador.** A hospedagem instala e executa o servidor; você acessa o GymFlow por um endereço HTTPS.
+## Publicar sem instalar programas no computador
 
 [![Publicar no Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/renataaap/gymflow/tree/work)
 
-1. Clique em **Publicar no Render** e entre ou crie sua conta.
-2. Autorize o acesso ao repositório `renataaap/gymflow`, caso seja solicitado.
-3. Revise os serviços e valores exibidos. A configuração inclui **serviço pago e disco persistente de 1 GB** para manter os cadastros após reiniciar.
-4. Confirme a implantação no Render. Não é preciso preencher comandos ou variáveis: o arquivo `render.yaml` já os define.
-5. Quando o serviço ficar **Live**, abra o endereço `https://…onrender.com` exibido pelo Render e escolha um perfil demonstrativo.
+1. Clique em **Publicar no Render** e entre na sua conta.
+2. Autorize o repositório `renataaap/gymflow` se for solicitado. A aplicação está na branch **work**.
+3. Revise a configuração: um serviço **Node.js** e um banco **PostgreSQL gerenciado**. Os planos configurados são pagos; confira os valores antes de confirmar.
+4. Confirme a criação. O Render instala o Node.js, compila o React, cria o PostgreSQL, injeta a conexão e executa as migrações automaticamente.
+5. Quando o serviço estiver **Live**, abra a URL HTTPS fornecida pelo Render. Não é necessário terminal ou instalação no seu computador.
 
-O botão seleciona a branch `work`, que contém a aplicação. O Python roda **somente no servidor**. Não há necessidade de terminal no seu computador. O endereço local `127.0.0.1` não é usado nesse fluxo.
+A configuração está em `render.yaml`. Não há banco SQLite nem disco de dados no servidor web: os registros ficam no PostgreSQL, independente de reiniciar ou atualizar a aplicação. O Blueprint cria recursos novos (`gymflow-node` e `gymflow-postgres`), sem apagar eventual serviço anterior. Consulte [PUBLICAR.md](docs/PUBLICAR.md) se já tiver uma hospedagem criada.
 
-A configuração publica uma **demonstração com dados fictícios e credenciais conhecidas**; não use essa base para dados reais. Atualizações de código não são publicadas automaticamente: no painel do serviço, use **Manual Deploy → Deploy latest commit** quando desejar atualizar. Consulte [o guia de publicação](docs/PUBLICAR.md) para solucionar problemas ou configurar um serviço já criado.
+**Situação da entrega:** a aplicação e um banco PostgreSQL real foram executados e testados no ambiente de desenvolvimento. A criação do banco na sua conta Render acontece ao confirmar o botão acima. Não há URL hospedada verificada nesta entrega.
 
-## Executar localmente (opcional, apenas para desenvolvimento)
-
-Requisito: Python 3.12 ou superior, com SQLite. Nenhum pacote de aplicação precisa ser instalado.
-
-```sh
-python3 app/server.py --seed-demo
-```
-
-Abra **http://127.0.0.1:8000**. No Windows, use `py -3 app/server.py --seed-demo` ou `iniciar.bat`. Em macOS/Linux, também pode executar `./run.sh`.
-
-O banco é criado em `work/gymflow.sqlite3`. `--seed-demo` só insere dados quando a tabela de usuários está vazia; reiniciar não apaga cadastros. O banco não está incluído no pacote: a demonstração começa em um estado reproduzível. A aplicação usa o fuso America/Sao_Paulo; em sistemas sem a base IANA, há fallback para UTC−03:00.
-
-### Acessos fictícios
+## Acessos da demonstração
 
 | Perfil | E-mail | Senha |
 |---|---|---|
@@ -40,81 +24,112 @@ O banco é criado em `work/gymflow.sqlite3`. `--seed-demo` só insere dados quan
 | Professor | professor1@gymflow.demo | GymFlow@2026! |
 | Aluno | aluno1@gymflow.demo | GymFlow@2026! |
 
-Os botões da tela de login preenchem essas credenciais e autenticam no servidor. Eles **não alteram o perfil** de uma sessão existente. Há também professor2/3 e aluno2 até aluno15; o aluno15 está inativo. O professor1 acompanha alunos3, 6, 9, 12 e 15. Para explorar uma mesma jornada, use professor1 + aluno3. Contas inativas não entram.
+Os botões autenticam contas reais da base demonstrativa, sem permitir trocar de papel numa sessão existente. Nesta versão, **professor1 acompanha aluno1**, aluno4, aluno7, aluno10 e aluno13. Há três professores e quinze alunos; aluno15 está inativo.
 
-## Funcionalidades implementadas
+O modo de demonstração contém apenas dados fictícios e senhas conhecidas. Não o use para dados pessoais reais.
 
-- Login, sessão de 8 horas, logout, alteração de dados e senha com conferência da senha atual. Senhas derivadas com scrypt e salt; cookies HttpOnly e SameSite=Strict.
-- Autorização em todas as operações do servidor. Administrador gerencia a academia; professor só recebe alunos atribuídos; aluno só recebe seus registros. O cliente não escolhe o papel de uma conta.
-- Alunos e professores: criar, pesquisar, editar, reativar/desativar; professor responsável, nascimento, objetivo e autorização para avaliações. Desativação revoga sessões.
-- Perfil do aluno com abas de informações, fichas, avaliações, frequência e financeiro (financeiro administrativo).
-- Biblioteca de exercícios: criar, consultar instruções, editar e desativar. Busca por nome, equipamento ou nível e filtro por grupo muscular.
-- Fichas com divisão A–G, séries, repetições, carga, intervalo, objetivo e orientações. Cada edição preserva a ficha anterior em um snapshot consultável.
-- Aluno pode iniciar um treino, registrar carga e repetições por exercício, marcar execução e concluir a sessão. O histórico mantém os dados registrados, mesmo após editar a ficha. Rascunho da execução nesta aba em sessionStorage; registros concluídos são do banco.
-- Avaliações: criar, editar, consultar histórico, gráfico de peso, medidas e próxima avaliação. Escrita exige autorização registrada no cadastro. A autorização é registrada manualmente pelo administrador após obtê-la do aluno.
-- Check-in manual ou pelo próprio aluno, com data e hora do servidor. Restrição UNIQUE impede mais de um check-in por aluno no dia.
-- Planos: criar, editar, desativar e vincular. Vincular gera uma assinatura e a primeira cobrança em uma transação; assinatura anterior fica no histórico.
-- Cobranças adicionais pelo valor do plano, vencimentos, status vencido calculado em tempo real, pagamento manual e cancelamento de cobranças abertas. Uma cobrança já paga/cancelada não pode ser paga novamente.
-- Dashboards por perfil, gráficos de receita, matrículas, frequência e distribuição de planos a partir de dados persistidos; filtros financeiros e CSV.
-- Configurações da academia, alertas de cobranças vencidas e auditoria de operações. Sem filas ou envio de mensagens externas.
-- Interface responsiva, menu lateral recolhível, navegação mobile, busca, filtros, ordenação alfabética, paginação, confirmações, validação e feedback. Modais com contenção de foco, Escape e respeito à preferência por movimento reduzido.
+## Funcionalidades
 
-### Dados de demonstração
+- Autenticação com senha scrypt e salt, sessão de oito horas, cookie HttpOnly/SameSite e Secure em produção, proteção CSRF, verificação de origem e limite de tentativas de login.
+- Três perfis: administrador, professor e aluno. Autorização no servidor e **Row Level Security (RLS) no PostgreSQL** para registros pessoais, treinos e finanças.
+- Alunos e professores: criar, consultar, pesquisar, filtrar, editar, desativar e reativar. Vínculo de professor, nascimento, objetivo e autorização para avaliações. Desativar revoga sessões.
+- Perfil do aluno em abas: visão geral, treinos, avaliações, frequência e financeiro administrativo.
+- Biblioteca de exercícios: grupo muscular, categoria, equipamento, nível, execução e cuidados. Busca, filtro, edição e desativação.
+- Fichas A–G com objetivo, orientações, séries, repetições, carga e intervalo. Edições preservam versões anteriores em JSONB.
+- Aluno inicia um treino, registra execução e conclui a sessão. O histórico mantém os valores realizados após revisões da ficha. Rascunhos ficam somente na aba; sessões concluídas são persistidas no PostgreSQL.
+- Avaliações com peso, altura, cintura, objetivo, observações, reavaliação e gráfico de evolução. Escrita exige autorização registrada no cadastro.
+- Check-in com data/hora do servidor e restrição UNIQUE. Duas requisições simultâneas não duplicam a presença.
+- Planos, assinaturas, geração manual de cobranças, pagamento manual, cancelamento e cálculo de vencidos. O valor é obtido do plano no servidor. Pagamento de uma cobrança já encerrada é bloqueado.
+- Dashboards por perfil com dados persistidos, receita por mês, matrículas, frequência e distribuição de planos; exportação CSV, alertas e auditoria.
+- Configurações da academia e perfil pessoal com alteração de senha mediante conferência da senha atual.
+- Layout responsivo, menu recolhível, navegação mobile, tabelas com busca/filtro/ordenação/paginação, modais com foco contido, confirmação e feedback de erros.
 
-1 administrador, 3 professores, 15 alunos, 30 exercícios, 10 fichas, 45 avaliações, 3 planos, 15 assinaturas, histórico de presenças e pagamentos. Todos fictícios. Os totais exibidos refletem a base, sem KPIs inventados.
+Seed idempotente: 1 administrador, 3 professores, 15 alunos, 30 exercícios, 10 fichas, 45 avaliações, 3 planos, assinaturas, presenças e pagamentos. Reiniciar não apaga nem duplica a base.
 
-## Arquitetura e modelo
+## Banco PostgreSQL
 
-- `app/server.py`: servidor HTTP, autenticação, validações, RBAC, consultas e transações.
-- `app/schema.sql`: banco relacional SQLite, versão inicial, chaves estrangeiras, índices, restrições e desativação lógica.
-- `app/static/`: frontend HTML/CSS/JavaScript sem framework ou dependências externas em tempo de execução.
-- `tests/test_api.py`: testes de integração em um banco temporário e isolado.
-- `tests/browser_qa.py`, `tests/browser_flows.py`: verificação opcional da interface com Playwright e Chromium.
+As migrações versionadas ficam em `db/migrations/`:
 
-Entidades: users (identidade, perfil e dados básicos combinados), teachers, students, exercises, workouts, workout_exercises, workout_versions, workout_sessions, workout_logs, assessments, attendance, membership_plans, subscriptions, payments, notifications, audit_logs, sessions e settings. O modelo inclui o equivalente às entidades exigidas, com Users/UserProfiles reunidos.
+- `001_initial.sql`: tabelas, relacionamentos, índices, validações, tipos monetários NUMERIC e funções de contexto.
+- `002_row_security.sql`: políticas RLS para dados pessoais, finanças, fichas e execuções.
 
-Valores de cobranças são definidos pelo servidor, não aceitos do navegador. Operações relacionadas usam transações. Identificadores de aluno são verificados contra o perfil em cada escrita, e todas as leituras de registros pessoais são limitadas ao escopo da sessão. As senhas e tokens de sessão nunca são retornados pela API. O banco guarda somente o hash do token de sessão. CSRF, verificação de origem, cabeçalhos de segurança, limite de requisição e limitação de tentativas de login estão implementados.
+Entidades: users (identidade e perfil), teachers, students, exercises, workouts, workout_exercises, workout_versions, workout_sessions, workout_logs, assessments, attendance, membership_plans, subscriptions, payments, sessions, notifications, audit_logs, settings e schema_migrations.
 
-## Testes
+As migrações usam lock transacional e checksum; uma migração já aplicada não pode ser alterada silenciosamente. Transações mantêm contexto de identidade com `set_config(..., true)`, que expira ao terminar a operação. Políticas são forçadas com `FORCE ROW LEVEL SECURITY`. Os testes utilizam um usuário PostgreSQL **sem SUPERUSER nem BYPASSRLS**. Acesso de inicialização é controlado exclusivamente pelo servidor.
 
-```sh
-python3 -m unittest discover -s tests -p 'test_*.py' -v
-node --check app/static/app.js
+Consultas usam parâmetros, respostas não expõem hashes e o cliente nunca recebe `DATABASE_URL`. A conexão do Blueprint usa a rede privada do Render; o banco bloqueia conexões públicas por `ipAllowList: []`.
+
+## Estrutura
+
+```text
+src/                  React + TypeScript, componentes e páginas
+server/               API Express, autenticação, autorização e transações
+db/migrations/        SQL e políticas do PostgreSQL
+scripts/              Migrações, seed e verificações de navegador
+tests/api.test.js     Integração com PostgreSQL real
+public/fonts/         Inter e Space Grotesk com licenças SIL OFL
+render.yaml           Aplicação Node + PostgreSQL na hospedagem
+.github/workflows/    Build e testes no GitHub Actions
 ```
 
-Os testes da API abrem um servidor em porta local temporária, criam e removem o próprio banco. Não alteram sua base. Node é usado apenas para checagem opcional do JavaScript, não para executar o app.
+## Desenvolvimento opcional
 
-Testes de navegador requerem `playwright` e um Chromium já instalado. Primeiro execute o servidor com uma base **descartável** de demonstração. Em seguida:
-
-```sh
-python3 tests/browser_qa.py
-python3 tests/browser_flows.py
-```
-
-Esses testes **criam registros** na base de demonstração. `GYMFLOW_TEST_URL` altera a URL (padrão `http://127.0.0.1:8000`) e `CHROMIUM_PATH` altera o executável (padrão `/usr/bin/chromium`). Capturas são gravadas em `work/`. Consulte `VALIDACAO.md` para resultados e limites.
-
-## O que ainda depende de configuração ou não foi implementado
-
-- A publicação pelo navegador foi preparada em `render.yaml`, mas a implantação na conta Render precisa ser concluída pelo titular no botão acima. Não há serviço Render ativo verificado nesta entrega. Não houve acesso a Base44/Lovable; o backend é Python/SQLite.
-- IA indisponível: nenhum modelo conectado, nenhuma resposta simulada.
-- E-mail/recuperação de senha indisponível: requer provedor e fluxo seguro de tokens, expiração e envio. Não há link de recuperação fictício.
-- Gateway de pagamentos, webhooks, cobrança automática recorrente e QR Code não conectados. Cobranças são geradas manualmente e pagamentos são registros administrativos.
-- Upload de fotos/vídeos não implementado; avatares usam iniciais. Não foram inventados vídeos demonstrativos de exercícios.
-- Gráfico de evolução mostra peso; outros indicadores estão no histórico. Não há comparador arbitrário de dois intervalos, tempo de descanso regressivo ou prescrição por IA.
-- LGPD: o campo de autorização e a restrição de acesso ajudam no fluxo, mas não substituem a definição da base legal, aviso de privacidade, processo de direitos dos titulares e política de retenção.
-- Esta entrega é uma implementação demonstrável, com publicação configurada, não uma declaração de prontidão para operação com dados pessoais reais. O servidor padrão da biblioteca Python foi escolhido para execução sem instalação; para produção, use servidor e infraestrutura apropriados, HTTPS, backups verificados, observabilidade, revisão de segurança e gestão de acesso.
-
-## Base vazia e administrador sem senha padrão
-
-Use outro caminho de banco, sem `--seed-demo`. Em Linux/macOS:
+Para quem desenvolve o código: Node.js 24 e um PostgreSQL acessível. Usuários finais precisam apenas do navegador.
 
 ```sh
-export GYMFLOW_DB=/caminho/persistente/gymflow.sqlite3
-export GYMFLOW_DEMO=0
-python3 app/server.py --create-admin
-python3 app/server.py
+npm ci
+cp .env.example .env
+# Edite DATABASE_URL na .env com uma base PostgreSQL própria.
+npm run dev
 ```
 
-O comando solicita nome, e-mail e senha pelo terminal (senha não exibida) e só cria o administrador se ainda não existir um. `GYMFLOW_DEMO=0` oculta os acessos de demonstração e bloqueia o seed. Guarde o banco em volume persistente protegido. Para servir atrás de HTTPS, configure `GYMFLOW_SECURE_COOKIE=1`; o servidor permanece em loopback por padrão. `--host` e `--port` podem ser definidos explicitamente pelo operador.
+O Vite serve a interface na porta 5173 e encaminha `/api` ao Node na porta 3000. `npm start` lê `.env`, aplica migrações, inicializa a base e serve o build em `dist/`. Para compilar:
 
-As fontes Inter e Space Grotesk foram obtidas do repositório oficial Google Fonts. Licenças SIL OFL em `app/static/fonts/`.
+```sh
+npm run build
+npm start
+```
+
+`npm run db:migrate` aplica as migrações explicitamente. `npm run db:seed` exige `GYMFLOW_DEMO=1` e não altera bases que já têm usuários. Não coloque credenciais no Git.
+
+### Base vazia com administrador próprio
+
+Em uma base PostgreSQL nova, configure no painel da hospedagem:
+
+```text
+GYMFLOW_DEMO=0
+INITIAL_ADMIN_NAME=Seu nome
+INITIAL_ADMIN_EMAIL=Seu e-mail
+INITIAL_ADMIN_PASSWORD=Uma senha exclusiva com pelo menos 12 caracteres
+```
+
+A senha deve ser preenchida como segredo no painel, nunca no código. O administrador só é criado se a base estiver vazia. Depois da primeira inicialização, remova `INITIAL_ADMIN_PASSWORD` do painel. Desligar a demonstração numa base já preenchida não apaga contas demonstrativas: use uma base nova para operação real.
+
+## Verificação
+
+```sh
+npm run build
+npm test
+```
+
+Os testes iniciam **PostgreSQL 18 real** em diretório temporário, criam um usuário sem privilégios de bypass, aplicam migrações e validam API/RLS/persistência. O pacote `embedded-postgres` é dependência somente de desenvolvimento; não é SQLite nem um banco simulado. Ele baixa os binários PostgreSQL por npm e não modifica o PostgreSQL do operador.
+
+A suíte e o build também estão configurados no GitHub Actions, sem necessidade de instalar ferramentas no computador do usuário.
+
+Verificação visual opcional, com Chromium e Playwright instalados no ambiente de desenvolvimento:
+
+```sh
+node scripts/dev-instance.js
+# Em outro terminal, usando a base descartável criada pelo comando acima:
+npm run test:browser
+```
+
+O roteiro altera somente essa base descartável. `scripts/browser-flows.js` exercita formulários completos. Capturas ficam em `work/react-qa/`. Consulte [VALIDACAO.md](VALIDACAO.md).
+
+## Limites da entrega
+
+IA, envio de e-mail/recuperação de senha e gateway de pagamentos continuam indisponíveis e identificados como tal. Pagamentos são registros manuais. Não há prescrição automática, QR Code, uploads de fotos/vídeos ou cobrança recorrente por gateway. O gráfico físico acompanha peso; as outras medidas ficam no histórico.
+
+Não houve migração automática dos arquivos de demonstração da versão anterior. Eles não foram publicados nem usados como dados reais. Histórico de código anterior permanece no Git.
+
+Antes de operar com dados reais, defina base legal, privacidade, retenção, backups, recuperação de senha e revisão de segurança. O registro administrativo de autorização não substitui esse processo.

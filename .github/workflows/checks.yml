@@ -1,4 +1,4 @@
-name: Verificar GymFlow
+name: Verificar GymFlow Node e PostgreSQL
 on:
   push:
     branches: [work, main]
@@ -10,15 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
       - uses: actions/setup-node@v4
         with:
-          node-version: '24'
-      - name: Verificar Python e JavaScript
-        run: |
-          python -m compileall -q app
-          node --check app/static/app.js
-      - name: Testar API e inicialização na hospedagem
-        run: python -m unittest discover -s tests -p 'test_*.py' -v
+          node-version: "24"
+          cache: npm
+      - run: npm ci --include=dev
+      - name: Compilar React e TypeScript
+        run: npm run build
+      - name: Testar API e políticas RLS no PostgreSQL real
+        run: npm test
