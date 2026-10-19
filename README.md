@@ -4,7 +4,23 @@ Aplicação web funcional para demonstração e avaliação de um sistema de aca
 
 O repositório recebido tinha somente um README. A aplicação foi construída do zero a partir dos dois textos; a identidade violeta do segundo texto prevalece. Não havia integrações ou dados anteriores para migrar.
 
-## Executar
+## Usar pelo navegador — sem instalar Python
+
+**Você não precisa instalar Python, Git, Node ou outro programa no computador.** A hospedagem instala e executa o servidor; você acessa o GymFlow por um endereço HTTPS.
+
+[![Publicar no Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/renataaap/gymflow/tree/work)
+
+1. Clique em **Publicar no Render** e entre ou crie sua conta.
+2. Autorize o acesso ao repositório `renataaap/gymflow`, caso seja solicitado.
+3. Revise os serviços e valores exibidos. A configuração inclui **serviço pago e disco persistente de 1 GB** para manter os cadastros após reiniciar.
+4. Confirme a implantação no Render. Não é preciso preencher comandos ou variáveis: o arquivo `render.yaml` já os define.
+5. Quando o serviço ficar **Live**, abra o endereço `https://…onrender.com` exibido pelo Render e escolha um perfil demonstrativo.
+
+O botão seleciona a branch `work`, que contém a aplicação. O Python roda **somente no servidor**. Não há necessidade de terminal no seu computador. O endereço local `127.0.0.1` não é usado nesse fluxo.
+
+A configuração publica uma **demonstração com dados fictícios e credenciais conhecidas**; não use essa base para dados reais. Atualizações de código não são publicadas automaticamente: no painel do serviço, use **Manual Deploy → Deploy latest commit** quando desejar atualizar. Consulte [o guia de publicação](docs/PUBLICAR.md) para solucionar problemas ou configurar um serviço já criado.
+
+## Executar localmente (opcional, apenas para desenvolvimento)
 
 Requisito: Python 3.12 ou superior, com SQLite. Nenhum pacote de aplicação precisa ser instalado.
 
@@ -79,14 +95,14 @@ Esses testes **criam registros** na base de demonstração. `GYMFLOW_TEST_URL` a
 
 ## O que ainda depende de configuração ou não foi implementado
 
-- A aplicação foi executada localmente neste ambiente. **Não foi publicada**: os auxiliares de publicação do Sites não estavam disponíveis. Não houve acesso a Base44/Lovable, nem foi presumida uma conta nessas plataformas. Foi utilizado backend equivalente local, em vez de Supabase/Base44.
+- A publicação pelo navegador foi preparada em `render.yaml`, mas a implantação na conta Render precisa ser concluída pelo titular no botão acima. Não há serviço Render ativo verificado nesta entrega. Não houve acesso a Base44/Lovable; o backend é Python/SQLite.
 - IA indisponível: nenhum modelo conectado, nenhuma resposta simulada.
 - E-mail/recuperação de senha indisponível: requer provedor e fluxo seguro de tokens, expiração e envio. Não há link de recuperação fictício.
 - Gateway de pagamentos, webhooks, cobrança automática recorrente e QR Code não conectados. Cobranças são geradas manualmente e pagamentos são registros administrativos.
 - Upload de fotos/vídeos não implementado; avatares usam iniciais. Não foram inventados vídeos demonstrativos de exercícios.
 - Gráfico de evolução mostra peso; outros indicadores estão no histórico. Não há comparador arbitrário de dois intervalos, tempo de descanso regressivo ou prescrição por IA.
 - LGPD: o campo de autorização e a restrição de acesso ajudam no fluxo, mas não substituem a definição da base legal, aviso de privacidade, processo de direitos dos titulares e política de retenção.
-- Esta entrega é uma implementação local demonstrável, não uma declaração de prontidão para operação com dados pessoais reais. O servidor padrão da biblioteca Python foi escolhido para execução sem instalação; para produção, use servidor e infraestrutura apropriados, HTTPS, backups verificados, observabilidade, revisão de segurança e gestão de acesso.
+- Esta entrega é uma implementação demonstrável, com publicação configurada, não uma declaração de prontidão para operação com dados pessoais reais. O servidor padrão da biblioteca Python foi escolhido para execução sem instalação; para produção, use servidor e infraestrutura apropriados, HTTPS, backups verificados, observabilidade, revisão de segurança e gestão de acesso.
 
 ## Base vazia e administrador sem senha padrão
 

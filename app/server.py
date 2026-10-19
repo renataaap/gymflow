@@ -153,6 +153,9 @@ class Handler(BaseHTTPRequestHandler):
                 except ValueError: fail(400,'JSON inválido.')
                 if not isinstance(data,dict): fail(400,'Dados inválidos.')
             with connect() as db:
+                if path=='/api/health' and method=='GET':
+                    if not one(db,'SELECT id FROM settings WHERE id=1'): fail(503,'Banco indisponível.')
+                    self.send(200,{'status':'ok'}); return
                 if path=='/api/config' and method=='GET':
                     self.send(200,{'demo':os.environ.get('GYMFLOW_DEMO','1')=='1'}); return
                 if path=='/api/login' and method=='POST':
@@ -351,7 +354,7 @@ class Handler(BaseHTTPRequestHandler):
         fail(404,'Operação não encontrada.')
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser(); parser.add_argument('--port',type=int,default=8000); parser.add_argument('--host',default='127.0.0.1'); parser.add_argument('--seed-demo',action='store_true'); parser.add_argument('--create-admin',action='store_true'); args=parser.parse_args()
+    parser=argparse.ArgumentParser(); parser.add_argument('--port',type=int,default=os.environ.get('PORT','8000')); parser.add_argument('--host',default='127.0.0.1'); parser.add_argument('--seed-demo',action='store_true'); parser.add_argument('--create-admin',action='store_true'); args=parser.parse_args()
     if args.seed_demo and os.environ.get('GYMFLOW_DEMO','1')!='1': raise SystemExit('Ative GYMFLOW_DEMO=1 para gerar dados fictícios.')
     init_db(args.seed_demo)
     if args.create_admin:

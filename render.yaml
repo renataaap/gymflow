@@ -1,0 +1,24 @@
+# Deploy pelo navegador. O banco fica em disco persistente (plano pago).
+services:
+  - type: web
+    name: gymflow-demo
+    runtime: python
+    branch: work
+    plan: 0.5c-512mb
+    autoDeployTrigger: 'off'
+    buildCommand: python -m compileall -q app
+    startCommand: python app/server.py --host 0.0.0.0 --seed-demo
+    healthCheckPath: /api/health
+    disk:
+      name: gymflow-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: GYMFLOW_DB
+        value: /var/data/gymflow.sqlite3
+      - key: GYMFLOW_DEMO
+        value: '1'
+      - key: GYMFLOW_SECURE_COOKIE
+        value: '1'
+      - key: PYTHONUNBUFFERED
+        value: '1'
