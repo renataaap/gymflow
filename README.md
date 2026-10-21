@@ -2,19 +2,28 @@
 
 Sistema web de gestão de academia, refeito em **React + TypeScript**, **Node.js + Express** e **PostgreSQL**. O projeto não usa runtime, scripts ou testes em Python. A identidade Athletic Tech Premium em preto, grafite e violeta foi mantida.
 
-## Publicar sem instalar programas no computador
+## Executar no computador
 
-[![Publicar no Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/renataaap/gymflow/tree/work)
+O projeto pode ser executado localmente, sem contratar hospedagem ou publicar um site. Requisitos: **Node.js 24**, npm e um banco **PostgreSQL** acessível.
 
-1. Clique em **Publicar no Render** e entre na sua conta.
-2. Autorize o repositório `renataaap/gymflow` se for solicitado. A aplicação está na branch **work**.
-3. Revise a configuração: um serviço **Node.js** e um banco **PostgreSQL gerenciado**. Os planos configurados são pagos; confira os valores antes de confirmar.
-4. Confirme a criação. O Render instala o Node.js, compila o React, cria o PostgreSQL, injeta a conexão e executa as migrações automaticamente.
-5. Quando o serviço estiver **Live**, abra a URL HTTPS fornecida pelo Render. Não é necessário terminal ou instalação no seu computador.
+1. Crie um banco PostgreSQL chamado `gymflow` e um usuário próprio, sem privilégios de superusuário, com permissão para criar as tabelas nesse banco.
+2. Instale as dependências e copie o arquivo de configuração:
 
-A configuração está em `render.yaml`. Não há banco SQLite nem disco de dados no servidor web: os registros ficam no PostgreSQL, independente de reiniciar ou atualizar a aplicação. O Blueprint cria recursos novos (`gymflow-node` e `gymflow-postgres`), sem apagar eventual serviço anterior. Consulte [PUBLICAR.md](docs/PUBLICAR.md) se já tiver uma hospedagem criada.
+```sh
+npm ci
+cp .env.example .env
+```
 
-**Situação da entrega:** a aplicação e um banco PostgreSQL real foram executados e testados no ambiente de desenvolvimento. A criação do banco na sua conta Render acontece ao confirmar o botão acima. Não há URL hospedada verificada nesta entrega.
+No PowerShell do Windows, use `Copy-Item .env.example .env` para copiar o arquivo.
+
+3. Edite `DATABASE_URL` na `.env` com usuário, senha, endereço e porta do seu PostgreSQL. Mantenha `GYMFLOW_DEMO=1` para explorar os dados fictícios.
+4. Inicie o projeto:
+
+```sh
+npm run dev
+```
+
+Abra **http://localhost:5173** no navegador. O Vite serve a interface React e encaminha as chamadas da API para o Node.js na porta 3000. A inicialização aplica as migrações e prepara os dados de demonstração automaticamente. Mantenha o terminal aberto durante o uso; pressione Ctrl+C para encerrar.
 
 ## Acessos da demonstração
 
@@ -57,7 +66,7 @@ Entidades: users (identidade e perfil), teachers, students, exercises, workouts,
 
 As migrações usam lock transacional e checksum; uma migração já aplicada não pode ser alterada silenciosamente. Transações mantêm contexto de identidade com `set_config(..., true)`, que expira ao terminar a operação. Políticas são forçadas com `FORCE ROW LEVEL SECURITY`. Os testes utilizam um usuário PostgreSQL **sem SUPERUSER nem BYPASSRLS**. Acesso de inicialização é controlado exclusivamente pelo servidor.
 
-Consultas usam parâmetros, respostas não expõem hashes e o cliente nunca recebe `DATABASE_URL`. A conexão do Blueprint usa a rede privada do Render; o banco bloqueia conexões públicas por `ipAllowList: []`.
+Consultas usam parâmetros, respostas não expõem hashes e o cliente nunca recebe `DATABASE_URL`.
 
 ## Estrutura
 
@@ -68,33 +77,25 @@ db/migrations/        SQL e políticas do PostgreSQL
 scripts/              Migrações, seed e verificações de navegador
 tests/api.test.js     Integração com PostgreSQL real
 public/fonts/         Inter e Space Grotesk com licenças SIL OFL
-render.yaml           Aplicação Node + PostgreSQL na hospedagem
 .github/workflows/    Build e testes no GitHub Actions
 ```
 
-## Desenvolvimento opcional
+## Executar o build local
 
-Para quem desenvolve o código: Node.js 24 e um PostgreSQL acessível. Usuários finais precisam apenas do navegador.
-
-```sh
-npm ci
-cp .env.example .env
-# Edite DATABASE_URL na .env com uma base PostgreSQL própria.
-npm run dev
-```
-
-O Vite serve a interface na porta 5173 e encaminha `/api` ao Node na porta 3000. `npm start` lê `.env`, aplica migrações, inicializa a base e serve o build em `dist/`. Para compilar:
+Para usar a interface compilada, com a mesma configuração `.env` e o PostgreSQL disponível:
 
 ```sh
 npm run build
 npm start
 ```
 
+Abra **http://localhost:3000**. O Node.js serve o build em `dist/` e a API no mesmo endereço. Esses comandos não publicam o projeto.
+
 `npm run db:migrate` aplica as migrações explicitamente. `npm run db:seed` exige `GYMFLOW_DEMO=1` e não altera bases que já têm usuários. Não coloque credenciais no Git.
 
 ### Base vazia com administrador próprio
 
-Em uma base PostgreSQL nova, configure no painel da hospedagem:
+Em uma base PostgreSQL nova, configure estas variáveis na sua `.env`:
 
 ```text
 GYMFLOW_DEMO=0
@@ -103,7 +104,7 @@ INITIAL_ADMIN_EMAIL=Seu e-mail
 INITIAL_ADMIN_PASSWORD=Uma senha exclusiva com pelo menos 12 caracteres
 ```
 
-A senha deve ser preenchida como segredo no painel, nunca no código. O administrador só é criado se a base estiver vazia. Depois da primeira inicialização, remova `INITIAL_ADMIN_PASSWORD` do painel. Desligar a demonstração numa base já preenchida não apaga contas demonstrativas: use uma base nova para operação real.
+Guarde a senha somente na `.env` local, nunca em arquivos versionados. O administrador só é criado se a base estiver vazia. Depois da primeira inicialização, remova `INITIAL_ADMIN_PASSWORD` da `.env`. Desligar a demonstração numa base já preenchida não apaga contas demonstrativas: use uma base nova para operação real.
 
 ## Verificação
 
