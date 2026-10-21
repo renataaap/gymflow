@@ -1,66 +1,59 @@
-# Publicar e usar sem instalar nada no computador
+# Publicar GymFlow com Node.js e PostgreSQL
 
-Acesse o GymFlow em qualquer navegador depois de publicar na hospedagem. O Python é executado pelo Render, não pelo seu computador. Os aplicativos e o banco continuam no servidor, com as mesmas permissões e regras de negócio.
+[Publicar pelo navegador](https://render.com/deploy?repo=https://github.com/renataaap/gymflow/tree/work)
 
-## Publicar pela primeira vez
+Não é necessário instalar nenhum programa no computador. O projeto usa React/TypeScript no navegador, Node.js no servidor e PostgreSQL para persistência.
 
-1. Abra [Publicar o GymFlow no Render](https://render.com/deploy?repo=https://github.com/renataaap/gymflow/tree/work).
-2. Entre na sua conta Render. Se o repositório for privado, autorize o aplicativo do Render no GitHub para o repositório `renataaap/gymflow`.
-3. Revise o Blueprint encontrado na branch `work`. A configuração cria um serviço web e um disco persistente de 1 GB. **São recursos pagos; confira e aprove os valores na sua conta antes de confirmar.** Esta alteração de código não criou serviços nem contratou um plano.
-4. Confirme a criação e aguarde o estado **Live**.
-5. Abra o endereço HTTPS exibido na página do serviço. Na tela do GymFlow, escolha Administrador, Professor ou Aluno para explorar os dados fictícios.
+## Primeira publicação
 
-Não baixe o repositório e não execute comandos no seu computador. Python, versão, porta, inicialização, cookies HTTPS, teste de saúde e caminho do banco já estão configurados. O Render escolhe o domínio; o projeto não inventa nem fixa uma URL `onrender.com`.
+1. Abra o botão acima e entre no Render.
+2. Conecte o repositório `renataaap/gymflow`. A origem deve ser a branch **work**.
+3. Revise os dois recursos propostos:
+   - `gymflow-node`: servidor web Node.js, que compila e serve o React.
+   - `gymflow-postgres`: PostgreSQL 18 com armazenamento persistente próprio.
+4. Confira os custos dos planos pagos configurados e confirme somente se concordar.
+5. Aguarde o estado **Live** no serviço web. O endereço HTTPS é fornecido pelo Render.
 
-A demonstração tem senhas públicas conhecidas, informadas na tela. Use apenas dados fictícios.
+A conexão `DATABASE_URL` é preenchida automaticamente pela referência ao banco. Migrações e seed idempotente são executados na inicialização. Senhas de banco não ficam no repositório, no bundle React nem no README.
 
-## Se você já criou um Web Service
+O Blueprint usa nomes novos para preservar um eventual serviço anterior. Criar este novo ambiente não remove nem converte o serviço anterior; não exclua recursos antigos até verificar o novo ambiente e seus dados.
 
-Não crie outro serviço somente para aplicar esta configuração. Abra **Settings** do serviço existente e configure pelos campos do painel:
+## Serviço existente
+
+Se a hospedagem anterior foi criada como serviço de outro runtime, crie o novo serviço **Node** e um PostgreSQL. Alterar só o comando de início não é suficiente para trocar o ambiente antigo.
+
+Para um serviço Node já existente, configure:
 
 | Campo | Valor |
 |---|---|
-| Repository | `renataaap/gymflow` |
 | Branch | `work` |
-| Runtime | Python |
-| Root Directory | deixe vazio |
-| Build Command | `python -m compileall -q app` |
-| Start Command | `python app/server.py --host 0.0.0.0 --seed-demo` |
-| Health Check Path | `/api/health` |
-
-Em **Environment**, adicione:
-
-| Chave | Valor |
-|---|---|
-| GYMFLOW_DB | `/var/data/gymflow.sqlite3` |
+| Runtime | Node |
+| Build Command | `npm ci --include=dev && npm run build` |
+| Start Command | `npm start` |
+| Health Check | `/api/health` |
+| NODE_ENV | `production` |
 | GYMFLOW_DEMO | `1` |
-| GYMFLOW_SECURE_COOKIE | `1` |
-| PYTHONUNBUFFERED | `1` |
+| DATABASE_URL | conexão privada do PostgreSQL, como segredo |
 
-Em **Disks**, crie um disco persistente de 1 GB, montado em `/var/data`. Discos exigem um plano compatível pago. Depois selecione **Manual Deploy → Deploy latest commit**. A porta vem automaticamente da variável `PORT` do Render; não é preciso preenchê-la.
+A versão de Node vem de `.node-version` (24). Não adicione `GYMFLOW_DB`: essa variável pertencia à versão anterior e não é usada. Não é necessário montar disco no servidor web. Mantenha aplicativo e banco na mesma região.
 
-Se havia dados em outro caminho, faça backup e migre o banco antes de mudar `GYMFLOW_DB`; trocar o caminho não move o arquivo existente. O seed só é executado quando não há usuários na base: uma nova implantação preserva o banco no disco persistente.
+O health check retorna `{"status":"ok","database":"postgresql"}` quando a conexão funciona. O servidor lê a porta do ambiente e escuta em `0.0.0.0`.
 
-## Atualizações e verificação
+## Atualizar
 
-O Blueprint mantém publicações automáticas desligadas, conforme a recomendação para botões de implantação. Depois de atualizar a branch, use **Manual Deploy → Deploy latest commit** para publicar quando decidir.
-
-Os testes ficam no GitHub em **Actions → Verificar GymFlow**. Eles executam no servidor do GitHub, sem programas instalados no computador do usuário.
-
-O caminho `/api/health` retorna somente `{"status":"ok"}` quando a base está acessível. O Render usa esse endpoint para verificar se a aplicação iniciou. Dados de alunos continuam protegidos por login na API.
+Publicações automáticas estão desativadas. Depois de enviar o código, use **Manual Deploy → Deploy latest commit** no serviço. O banco permanece independente do servidor; migrações já aplicadas não são reaplicadas.
 
 ## Problemas comuns
 
-- **Nenhum Blueprint encontrado:** confirme que a origem é a branch `work`; o botão acima inclui essa seleção.
-- **Repositório privado não aparece:** no GitHub, conceda acesso ao aplicativo oficial do Render para esse repositório.
-- **Serviço sem porta aberta:** use o comando configurado acima. Ele escuta em `0.0.0.0` e lê `PORT` do Render.
-- **Dados somem ao reiniciar:** confirme disco persistente e `GYMFLOW_DB=/var/data/gymflow.sqlite3`. O disco efêmero de um serviço sem volume não preserva SQLite entre implantações.
-- **Login não mantém sessão:** abra a URL HTTPS fornecida pelo Render; os cookies da configuração hospedada exigem HTTPS.
-- **Não deseja contratar hospedagem paga:** não confirme esse Blueprint. Esta configuração prioriza preservar o SQLite; uma publicação gratuita com persistência exigiria adaptar o banco para um serviço externo.
+- **O botão mostra código antigo:** confirme que a URL contém `/tree/work`.
+- **DATABASE_URL ausente:** use o Blueprint ou configure a conexão privada do PostgreSQL no painel. Não publique a conexão no chat ou no GitHub.
+- **Falha de conexão:** verifique região, hostname, usuário e regras de rede. Bancos externos podem exigir `DATABASE_SSL=require` e certificado válido. A verificação TLS não é desativada pelo código.
+- **Banco vazio sem login:** com `GYMFLOW_DEMO=1`, uma base vazia recebe as contas fictícias. Para contas próprias, siga o bootstrap seguro descrito no README.
+- **Dados de demonstração anteriores não aparecem:** esta versão cria um PostgreSQL novo; não importa automaticamente os arquivos da aplicação anterior.
+- **Login não permanece:** abra a URL HTTPS oficial. Em produção, o cookie exige conexão segura.
+- **Migração aplicada foi alterada:** não edite arquivos SQL aplicados. Crie outra migração com o próximo número.
 
-## Referências oficiais
+## Referências
 
-- [Botão de implantação e escolha da branch](https://render.com/docs/deploy-to-render)
-- [Configuração do Blueprint](https://render.com/docs/blueprint-spec)
-- [Discos persistentes](https://render.com/docs/disks)
-- [Versão do Python instalada pelo Render](https://render.com/docs/python-version)
+- [Blueprint e PostgreSQL no Render](https://render.com/docs/blueprint-spec)
+- [Escolha da branch no botão de publicação](https://render.com/docs/deploy-to-render)

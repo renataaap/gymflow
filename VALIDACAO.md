@@ -1,54 +1,56 @@
-# Validação da entrega
+# Validação — GymFlow Node.js / React / PostgreSQL
 
-Verificação executada em 19/10/2026, em ambiente local Linux, Python 3.12.14 e Chromium. Contas e registros de teste são fictícios.
+Verificação local em 19/10/2026 com Node.js 24, React 19, TypeScript, Vite e PostgreSQL 18 real. O código e os testes da versão anterior foram substituídos; os resultados anteriores não foram reutilizados como validação desta implementação.
 
-## API, banco e hospedagem — 11 testes aprovados
+## Build
 
-`python -m unittest discover -s tests -p 'test_*.py' -v`
+`npm run build`: checagem TypeScript estrita e build Vite aprovados. A interface é composta por componentes React; não utiliza execução de scripts do servidor anterior.
 
-1. Quantidades iniciais de dados demonstrativos e ausência de senhas na resposta.
-2. Cadastro de professor e aluno, criação de plano, assinatura, cobrança, pagamento, bloqueio de pagamento repetido e persistência em outra sessão.
-3. Aluno recebe somente seus registros; tentativas de acesso a outro aluno, criação de plano e escalada de perfil são negadas.
-4. Professor recebe apenas alunos atribuídos; criação e revisão de ficha preservam snapshot; avaliação depende de autorização registrada.
-5. Execução do aluno exige todos os exercícios e persiste carga e repetições.
-6. Check-in exige CSRF, bloqueia outra origem e impede duplicação no dia.
-7. Dados inválidos são rejeitados e a transação de cadastro é revertida sem deixar usuário parcial.
-8. Desativação revoga acesso; logout invalida a sessão.
-9. API protegida rejeita requisição sem autenticação.
-10. Integridade do SQLite e chaves estrangeiras sem violações.
+## API e banco — 13 testes aprovados
 
-11. Comando real de hospedagem testado em subprocesso: lê a porta `PORT`, cria o banco em diretório persistente configurável, responde ao health check sem expor dados, preserva alterações em duas reinicializações sem duplicar o seed e emite cookie com Secure, HttpOnly e SameSite=Strict no modo HTTPS.
+`npm test` cria uma instância PostgreSQL real e isolada, com usuário sem SUPERUSER e sem BYPASSRLS.
 
-Resultado final após preparar a publicação: **11/11 aprovados**, em bancos temporários isolados. `node --check app/static/app.js` e compilação Python também passaram.
+1. Migrações aplicadas, seed idempotente e quantidades demonstrativas corretas; respostas sem hashes de senha.
+2. Administrador cria professor, aluno, plano, assinatura e cobrança; valor vem do plano, pagamento persiste e não pode ser registrado novamente.
+3. Professor cria e revisa uma ficha com snapshot anterior e registra uma avaliação para aluno atribuído.
+4. Aluno recebe somente seus dados; alteração de papel, cobrança e acesso a outro aluno são negados.
+5. Consultas SQL diretas sob identidade de aluno/professor respeitam RLS; escrita para outro aluno é rejeitada pelo PostgreSQL. Conexão sem contexto não recebe avaliações.
+6. Aluno conclui treino; carga registrada permanece no histórico depois da revisão da ficha.
+7. Duas requisições simultâneas de check-in geram uma presença; CSRF inválido e origem externa são bloqueados.
+8. Cadastro inválido não deixa usuário parcial; avaliação sem autorização é rejeitada.
+9. Desativação revoga sessões e preserva pagamentos; logout encerra o acesso.
+10. Outra conexão encontra os registros persistidos; configuração de produção emite cookie Secure/HttpOnly/SameSite.
+11. O PostgreSQL é parado e reiniciado; os dados permanecem e o seed não duplica usuários.
 
-## Navegador — fluxos reais aprovados
+12. Uma base PostgreSQL vazia cria um administrador exclusivo a partir de segredos de ambiente, sem usuários de demonstração e sem duplicar a conta ao reiniciar.
+13. O comando real da hospedagem inicia o servidor, aplica migrações, lê PORT, serve o build React e encerra corretamente com SIGTERM.
 
-Executados por Playwright com o Chromium instalado, com servidor local e base descartável.
+Resultado final: **13/13 testes aprovados**.
 
-- Login em cada um dos três perfis.
-- Abertura das páginas de administrador e dos formulários principais sem erros de JavaScript.
-- Cadastro de professor e aluno pela interface.
-- Vínculo de plano, geração automática da primeira cobrança e registro manual de pagamento com status Pago.
-- Professor cria ficha para aluno atribuído, registra avaliação e revisa ficha com preservação da versão anterior.
-- Aluno faz check-in, recebe erro útil ao tentar duplicar, registra carga e conclui um treino.
-- Histórico de execução e versão anterior da ficha acessíveis após salvar.
-- Capturas desktop em 1440 × 1000 e mobile em 390 × 844. Sem transbordamento horizontal da página nos dashboards de administrador e aluno. Tabelas usam rolagem contida.
+## Navegador — dois roteiros aprovados
+
+Os roteiros em `scripts/browser-test.js` e `scripts/browser-flows.js` foram executados com Chromium, frontend React, API Node e PostgreSQL real:
+
+- Login em cada um dos três perfis e abertura dos módulos administrativos.
+- Cadastro de professor e aluno, vínculo de plano, geração de cobrança e pagamento manual pela interface.
+- Professor cria ficha, registra avaliação e revisa a ficha; versão anterior acessível.
+- Aluno faz check-in, vê erro útil ao repetir, registra carga e conclui um treino pelo celular.
+- Execução concluída acessível no histórico persistido.
+- Desktop em 1440 × 1000 e mobile em 390 × 844, sem transbordamento horizontal dos dashboards.
 - **Nenhum erro de JavaScript observado** nos dois roteiros.
 
-Os roteiros estão em `tests/browser_qa.py` e `tests/browser_flows.py`. São verificações funcionais, não uma auditoria completa de acessibilidade ou um pentest. Foram exercitados desktop e celular; os breakpoints de tablet foram implementados, mas não tiveram um roteiro separado nesta entrega.
+Capturas foram geradas em `work/react-qa/`, somente com dados fictícios.
 
-## Limites verificados e informados
+## Publicação
 
-Não houve publicação nem validação em infraestrutura pública. E-mail/recuperação de senha, IA, gateway, QR Code, uploads e cobrança recorrente automática não foram implementados ou simulados. O aplicativo informa indisponibilidade dos serviços. A persistência validada é SQLite no disco local, não Supabase ou banco hospedado.
+O Blueprint define um serviço Node.js e um PostgreSQL gerenciado, com conexão privada, criação de tabelas automática e health check. A estrutura foi conferida com a documentação do Render. Não foi provisionado um serviço pago nem validada uma URL hospedada na conta do usuário. A confirmação dos recursos ocorre no painel do Render.
 
-As capturas mostram dados fictícios. A autorização de avaliações é um registro administrativo manual; não equivale, por si só, a um processo jurídico completo de consentimento. Consulte o README antes de utilizar dados reais.
+## Limites
 
-## Publicação pelo navegador
+Testes funcionais não equivalem a pentest, auditoria jurídica de privacidade ou auditoria completa de acessibilidade. IA, recuperação por e-mail, gateway, QR Code e uploads não foram conectados nem simulados. A autorização de avaliação é um registro administrativo manual. Antes de usar dados reais, configure os serviços operacionais e a governança descritos no README.
 
-Adicionados `render.yaml`, `.python-version`, botão de publicação no README e guia `docs/PUBLICAR.md`. O YAML foi lido e conferido localmente, com campos e seleção de branch consultados na documentação oficial do Render. A conta Render e o provisionamento do serviço não foram acessados; não foi executada validação autenticada do Blueprint no Render nem verificada uma URL hospedada. O plano pago e o disco são revisados e aprovados pelo usuário na hospedagem. O código inclui um workflow para executar a suíte no GitHub; a execução remota desse workflow depende do GitHub Actions e não foi verificada nesta entrega.
+## Melhorias React — 21/10/2026
 
-## Melhoria do treino — 21/10/2026
+Cronômetro de descanso implementado em React/TypeScript, com pausa, continuação, reinício e limpeza automática ao fechar o treino. Exercícios concluídos recebem destaque, e o rascunho recuperado apresenta aviso. Nenhum runtime, script ou teste Python faz parte desta versão.
 
-Adicionado cronômetro de descanso por exercício, com pausa, continuação, reinício e encerramento. O painel permanece visível ao rolar a ficha. Exercícios realizados recebem destaque e a retomada informa a recuperação do rascunho da aba. O cronômetro encerra ao fechar o treino; não envia notificações em segundo plano.
-
-`python3 tests/browser_rest.py`: aprovado em viewport 390 × 844, sem erros de JavaScript. Verificados pausa, término, reinício, limpeza ao fechar, recuperação de carga e marcação, e largura do formulário. Os 11 testes de integração/hospedagem e a verificação de sintaxe JavaScript também passaram nesta rodada.
+Verificação desta rodada: build TypeScript/Vite aprovado, 13/13 testes Node com PostgreSQL aprovados e roteiro Playwright em JavaScript aprovado em desktop e celular, sem erros de JavaScript. O roteiro verifica pausa, término, reinício, recuperação de carga e conclusão persistida do treino.
