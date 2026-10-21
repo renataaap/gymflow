@@ -36,7 +36,7 @@ O modo de demonstração contém apenas dados fictícios e senhas conhecidas. N�
 - Perfil do aluno em abas: visão geral, treinos, avaliações, frequência e financeiro administrativo.
 - Biblioteca de exercícios: grupo muscular, categoria, equipamento, nível, execução e cuidados. Busca, filtro, edição e desativação.
 - Fichas A–G com objetivo, orientações, séries, repetições, carga e intervalo. Edições preservam versões anteriores em JSONB.
-- Aluno inicia um treino, registra execução e conclui a sessão. O histórico mantém os valores realizados após revisões da ficha. Rascunhos ficam somente na aba; sessões concluídas são persistidas no PostgreSQL.
+- Aluno inicia um treino, registra execução e conclui a sessão. O histórico mantém os valores realizados após revisões da ficha. Cronômetro de descanso com pausa, continuação e reinício, destaque dos exercícios concluídos e aviso ao recuperar o rascunho. Rascunhos ficam somente na aba; sessões concluídas são persistidas no PostgreSQL.
 - Avaliações com peso, altura, cintura, objetivo, observações, reavaliação e gráfico de evolução. Escrita exige autorização registrada no cadastro.
 - Check-in com data/hora do servidor e restrição UNIQUE. Duas requisições simultâneas não duplicam a presença.
 - Planos, assinaturas, geração manual de cobranças, pagamento manual, cancelamento e cálculo de vencidos. O valor é obtido do plano no servidor. Pagamento de uma cobrança já encerrada é bloqueado.

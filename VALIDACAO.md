@@ -48,3 +48,9 @@ O Blueprint define um serviço Node.js e um PostgreSQL gerenciado, com conexão 
 ## Limites
 
 Testes funcionais não equivalem a pentest, auditoria jurídica de privacidade ou auditoria completa de acessibilidade. IA, recuperação por e-mail, gateway, QR Code e uploads não foram conectados nem simulados. A autorização de avaliação é um registro administrativo manual. Antes de usar dados reais, configure os serviços operacionais e a governança descritos no README.
+
+## Melhorias React — 21/10/2026
+
+Cronômetro de descanso implementado em React/TypeScript, com pausa, continuação, reinício e limpeza automática ao fechar o treino. Exercícios concluídos recebem destaque, e o rascunho recuperado apresenta aviso. Nenhum runtime, script ou teste Python faz parte desta versão.
+
+Verificação desta rodada: build TypeScript/Vite aprovado, 13/13 testes Node com PostgreSQL aprovados e roteiro Playwright em JavaScript aprovado em desktop e celular, sem erros de JavaScript. O roteiro verifica pausa, término, reinício, recuperação de carga e conclusão persistida do treino.

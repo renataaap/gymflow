@@ -1873,3 +1873,5 @@ tbody tr:hover {
 .content > section + section {
   margin-top: 18px;
 }
+
+.rest-panel{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:14px;background:#252033;border:1px solid #675487;border-radius:10px;padding:14px 16px;margin:16px 0;box-shadow:0 8px 24px #0004}.rest-panel p{font-size:11px;color:var(--lavender)}.rest-panel strong{font-size:32px;font-variant-numeric:tabular-nums}.rest-panel .row{gap:7px;flex-wrap:wrap}.exercise-run.completed{background:#9c88ff08;box-shadow:inset 3px 0 var(--primary);padding-left:12px;padding-right:12px;border-radius:8px}.exercise-run.completed h3{color:var(--primary)}.draft-notice{font-size:11px;color:var(--primary);margin:14px 0}@media(max-width:400px){.rest-panel{align-items:flex-start;flex-direction:column}}

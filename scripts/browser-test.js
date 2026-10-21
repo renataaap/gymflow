@@ -84,7 +84,29 @@ try {
   await page
     .getByRole("button", { name: "Iniciar treino", exact: true })
     .click();
-  const dialog = page.getByRole("dialog");
+  let dialog = page.getByRole("dialog");
+  await page.clock.install();
+  const first = dialog.locator('.exercise-run').first();
+  await first.getByRole('spinbutton', {name: /Carga realizada/}).fill('42');
+  await first.getByRole('checkbox', {name: 'Realizado'}).check();
+  if (!await first.evaluate(el => el.classList.contains('completed'))) throw Error('Exercício sem destaque');
+  await dialog.getByRole('button', {name: /^Descansar/}).first().click();
+  await dialog.getByRole('button', {name: 'Pausar', exact: true}).click();
+  const paused = await dialog.getByRole('timer').innerText();
+  await page.clock.fastForward(2000);
+  if (await dialog.getByRole('timer').innerText() !== paused) throw Error('Pausa falhou');
+  await dialog.getByRole('button', {name: 'Continuar', exact: true}).click();
+  await page.clock.fastForward(3600000);
+  if (await dialog.getByRole('timer').innerText() !== '00:00') throw Error('Descanso não terminou');
+  await dialog.getByRole('button', {name: /^Descansar/}).first().click();
+  if (!await dialog.getByRole('button', {name: 'Pausar', exact: true}).isEnabled()) throw Error('Reinício falhou');
+  await dialog.getByRole('button', {name: 'Continuar depois'}).click();
+  await page.getByRole('button', {name: 'Iniciar treino', exact: true}).click();
+  dialog = page.getByRole('dialog');
+  await dialog.getByText('Rascunho retomado:', {exact: false}).waitFor();
+  if (await dialog.locator('.exercise-run').first().getByRole('spinbutton', {name: /Carga realizada/}).inputValue() !== '42') throw Error('Rascunho perdido');
+  if (await dialog.getByRole('timer').count()) throw Error('Cronômetro não foi limpo');
+  await page.clock.resume();
   for (const row of await dialog.locator(".exercise-run").all()) {
     await row.getByRole("spinbutton", { name: /Carga realizada/ }).fill("25");
     await row.getByRole("checkbox", { name: "Realizado" }).check();

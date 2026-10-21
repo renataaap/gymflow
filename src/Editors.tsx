@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, X, ShieldCheck } from "lucide-react";
 import type { State, EditorSpec, Workout } from "./types";
 import { Modal, Field, Button, money } from "./ui";
@@ -514,7 +514,7 @@ export function RunWorkout({
   const [logs, setLogs] = useState(() => {
     try {
       const draft = JSON.parse(sessionStorage.getItem(key) || "null");
-      if (Array.isArray(draft) && draft.length === w.exercises.length)
+      if (Array.isArray(draft) && draft.length === w.exercises.length && draft.every((row, i) => row.exercise_id === w.exercises[i].exercise_id))
         return draft as {
           exercise_id: number;
           load: string;
@@ -536,6 +536,18 @@ export function RunWorkout({
     setLogs(next);
     sessionStorage.setItem(key, JSON.stringify(next));
   };
+  const [resumed] = useState(() => {
+    try { const draft = JSON.parse(sessionStorage.getItem(key) || "null"); return Array.isArray(draft) && draft.length === w.exercises.length && draft.every((row, i) => row.exercise_id === w.exercises[i].exercise_id); } catch { return false; }
+  });
+  const [rest, setRest] = useState<{name: string; remaining: number; deadline: number | null} | null>(null);
+  useEffect(() => {
+    if (!rest?.deadline) return;
+    const deadline = rest.deadline;
+    const tick = () => setRest(current => current?.deadline === deadline ? {...current, remaining: Math.max(0, Math.ceil((deadline-Date.now())/1000)), deadline: deadline <= Date.now() ? null : deadline} : current);
+    tick();
+    const timer = window.setInterval(tick, 250);
+    return () => window.clearInterval(timer);
+  }, [rest?.deadline]);
   const count = logs.filter((l) => l.done).length;
   return (
     <Modal
@@ -568,10 +580,20 @@ export function RunWorkout({
             <BadgeCount value={`${count} de ${logs.length} exercícios`} />
           </div>
           <div className="progress-track">
-            <span style={{ width: `${(count / logs.length) * 100}%` }} />
+            <span style={{ width: `${logs.length ? (count / logs.length) * 100 : 0}%` }} />
           </div>
+          {rest && <section className="rest-panel" aria-label="Cronômetro de descanso">
+            <div><p role="status">{rest.remaining === 0 ? "Descanso concluído. Pronto para a próxima série." : 'Descanso · '+rest.name}</p>
+              <strong role="timer" className="number">{String(Math.floor(rest.remaining/60)).padStart(2,'0')}:{String(rest.remaining%60).padStart(2,'0')}</strong>
+            </div>
+            <div className="row">
+              <Button disabled={rest.remaining===0} onClick={() => setRest(current => current ? {...current, remaining: current.deadline ? Math.max(0,Math.ceil((current.deadline-Date.now())/1000)) : current.remaining, deadline: current.deadline ? null : Date.now()+current.remaining*1000} : null)}>{rest.deadline ? "Pausar" : "Continuar"}</Button>
+              <Button onClick={() => setRest(null)}>Encerrar</Button>
+            </div>
+          </section>}
+          {resumed && <p className="draft-notice">Rascunho retomado: seus registros desta aba foram recuperados.</p>}
           {w.exercises.map((ex, i) => (
-            <div className="exercise-run" key={i}>
+            <div className={"exercise-run"+(logs[i].done ? " completed" : "")} key={ex.exercise_id}>
               <h3>
                 {i + 1}. {ex.name}
               </h3>
@@ -580,6 +602,7 @@ export function RunWorkout({
                 de descanso
               </small>
               <p>{ex.instructions}</p>
+              {ex.rest > 0 && <Button onClick={() => setRest({name: ex.name, remaining: ex.rest, deadline: Date.now()+ex.rest*1000})}>Descansar {ex.rest}s</Button>}
               <div className="form-grid">
                 <Field
                   label="Carga realizada (kg)"
