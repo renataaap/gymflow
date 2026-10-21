@@ -50,7 +50,7 @@ Os botões da tela de login preenchem essas credenciais e autenticam no servidor
 - Perfil do aluno com abas de informações, fichas, avaliações, frequência e financeiro (financeiro administrativo).
 - Biblioteca de exercícios: criar, consultar instruções, editar e desativar. Busca por nome, equipamento ou nível e filtro por grupo muscular.
 - Fichas com divisão A–G, séries, repetições, carga, intervalo, objetivo e orientações. Cada edição preserva a ficha anterior em um snapshot consultável.
-- Aluno pode iniciar um treino, registrar carga e repetições por exercício, marcar execução e concluir a sessão. O histórico mantém os dados registrados, mesmo após editar a ficha. Rascunho da execução nesta aba em sessionStorage; registros concluídos são do banco.
+- Aluno pode iniciar um treino, registrar carga e repetições por exercício, marcar execução e concluir a sessão. O histórico mantém os dados registrados, mesmo após editar a ficha. Cronômetro de descanso por exercício com pausa, continuação e reinício, destaque dos exercícios realizados e aviso de rascunho recuperado. Rascunho da execução nesta aba em sessionStorage; registros concluídos são do banco.
 - Avaliações: criar, editar, consultar histórico, gráfico de peso, medidas e próxima avaliação. Escrita exige autorização registrada no cadastro. A autorização é registrada manualmente pelo administrador após obtê-la do aluno.
 - Check-in manual ou pelo próprio aluno, com data e hora do servidor. Restrição UNIQUE impede mais de um check-in por aluno no dia.
 - Planos: criar, editar, desativar e vincular. Vincular gera uma assinatura e a primeira cobrança em uma transação; assinatura anterior fica no histórico.
@@ -89,6 +89,7 @@ Testes de navegador requerem `playwright` e um Chromium já instalado. Primeiro 
 ```sh
 python3 tests/browser_qa.py
 python3 tests/browser_flows.py
+python3 tests/browser_rest.py
 ```
 
 Esses testes **criam registros** na base de demonstração. `GYMFLOW_TEST_URL` altera a URL (padrão `http://127.0.0.1:8000`) e `CHROMIUM_PATH` altera o executável (padrão `/usr/bin/chromium`). Capturas são gravadas em `work/`. Consulte `VALIDACAO.md` para resultados e limites.
@@ -100,7 +101,7 @@ Esses testes **criam registros** na base de demonstração. `GYMFLOW_TEST_URL` a
 - E-mail/recuperação de senha indisponível: requer provedor e fluxo seguro de tokens, expiração e envio. Não há link de recuperação fictício.
 - Gateway de pagamentos, webhooks, cobrança automática recorrente e QR Code não conectados. Cobranças são geradas manualmente e pagamentos são registros administrativos.
 - Upload de fotos/vídeos não implementado; avatares usam iniciais. Não foram inventados vídeos demonstrativos de exercícios.
-- Gráfico de evolução mostra peso; outros indicadores estão no histórico. Não há comparador arbitrário de dois intervalos, tempo de descanso regressivo ou prescrição por IA.
+- Gráfico de evolução mostra peso; outros indicadores estão no histórico. Não há comparador arbitrário de dois intervalos, prescrição por IA.
 - LGPD: o campo de autorização e a restrição de acesso ajudam no fluxo, mas não substituem a definição da base legal, aviso de privacidade, processo de direitos dos titulares e política de retenção.
 - Esta entrega é uma implementação demonstrável, com publicação configurada, não uma declaração de prontidão para operação com dados pessoais reais. O servidor padrão da biblioteca Python foi escolhido para execução sem instalação; para produção, use servidor e infraestrutura apropriados, HTTPS, backups verificados, observabilidade, revisão de segurança e gestão de acesso.
 

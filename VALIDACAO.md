@@ -46,3 +46,9 @@ As capturas mostram dados fictícios. A autorização de avaliações é um regi
 ## Publicação pelo navegador
 
 Adicionados `render.yaml`, `.python-version`, botão de publicação no README e guia `docs/PUBLICAR.md`. O YAML foi lido e conferido localmente, com campos e seleção de branch consultados na documentação oficial do Render. A conta Render e o provisionamento do serviço não foram acessados; não foi executada validação autenticada do Blueprint no Render nem verificada uma URL hospedada. O plano pago e o disco são revisados e aprovados pelo usuário na hospedagem. O código inclui um workflow para executar a suíte no GitHub; a execução remota desse workflow depende do GitHub Actions e não foi verificada nesta entrega.
+
+## Melhoria do treino — 21/10/2026
+
+Adicionado cronômetro de descanso por exercício, com pausa, continuação, reinício e encerramento. O painel permanece visível ao rolar a ficha. Exercícios realizados recebem destaque e a retomada informa a recuperação do rascunho da aba. O cronômetro encerra ao fechar o treino; não envia notificações em segundo plano.
+
+`python3 tests/browser_rest.py`: aprovado em viewport 390 × 844, sem erros de JavaScript. Verificados pausa, término, reinício, limpeza ao fechar, recuperação de carga e marcação, e largura do formulário. Os 11 testes de integração/hospedagem e a verificação de sintaxe JavaScript também passaram nesta rodada.
